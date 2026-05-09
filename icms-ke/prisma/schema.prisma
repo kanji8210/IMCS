@@ -21,6 +21,51 @@ enum RiskLevel {
   CRITICAL
 }
 
+enum ViolationType {
+  // Temporal (Status & Duration Violations)
+  ETA_OVERSTAY
+  EXPIRED_PERMIT
+  BREACH_OF_CONDITIONS
+
+  // Integrity (Documentary & Identity Violations)
+  DOCUMENT_FORGERY
+  MATERIAL_MISREPRESENTATION
+  FAILURE_TO_NOTIFY
+
+  // Regulatory (Compliance & Administrative Violations)
+  FAILURE_TO_REGISTER
+  ILLEGAL_EMPLOYMENT
+  ILLEGAL_HIRING
+  DOCUMENT_REJECTION_FOLLOWUP
+
+  // Security (Security & Public Interest Violations)
+  PROHIBITED_IMMIGRANT
+  CRIMINAL_CONVICTION
+  THREAT_TO_NATIONAL_SECURITY
+}
+
+enum ViolationDomain {
+  TEMPORAL
+  INTEGRITY
+  REGULATORY
+  SECURITY
+}
+
+enum ViolationSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ViolationStatus {
+  REPORTED
+  UNDER_REVIEW
+  ESCALATED
+  RESOLVED
+  DISMISSED
+}
+
 model Individual {
   id          String              @id
   fullName    String
@@ -29,6 +74,7 @@ model Individual {
   countryCode String
   etaRecords  ETARecord[]
   cases       ImmigrationCase[]
+  violations  Violation[]
 
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
@@ -77,4 +123,26 @@ model Recommendation {
   immigrationCase ImmigrationCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
   @@index([caseId])
+}
+
+model Violation {
+  id               String            @id
+  individualId     String?
+  type             ViolationType
+  domain           ViolationDomain
+  severity         ViolationSeverity
+  description      String            @db.Text
+  reportedByActorId String?
+  status           ViolationStatus   @default(REPORTED)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  individual       Individual?       @relation(fields: [individualId], references: [id], onDelete: SetNull)
+
+  @@index([individualId])
+  @@index([type])
+  @@index([domain])
+  @@index([severity])
+  @@index([status])
+  @@index([createdAt])
 }
