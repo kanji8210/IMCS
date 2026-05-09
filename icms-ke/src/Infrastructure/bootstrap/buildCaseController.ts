@@ -1,4 +1,5 @@
 import { FlagExpiringETAUseCase } from "@/Application/UseCases/FlagExpiringETAUseCase";
+import { NotifyIndividualUseCase } from "@/Application/UseCases/NotifyIndividualUseCase";
 import { ProcessDocumentRejectionUseCase } from "@/Application/UseCases/ProcessDocumentRejectionUseCase";
 import { SubmitRecommendationUseCase } from "@/Application/UseCases/SubmitRecommendationUseCase";
 import { CaseController } from "@/Presentation/Controllers/CaseController";
@@ -42,9 +43,17 @@ export function buildCaseController(): CaseController {
     clock
   );
 
+  const notifyIndividualUseCase = new NotifyIndividualUseCase(
+    policyService,
+    individualRepository,
+    notificationPort,
+    auditPort
+  );
+
   return new CaseController(
     flagExpiringETAUseCase,
     processDocumentRejectionUseCase,
-    submitRecommendationUseCase
+    submitRecommendationUseCase,
+    notifyIndividualUseCase
   );
 }
