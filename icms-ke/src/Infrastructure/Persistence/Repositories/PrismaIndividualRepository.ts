@@ -19,7 +19,7 @@ export class PrismaIndividualRepository implements IndividualRepository {
   ): Promise<Array<{ individual: Individual; eta: ETARecord }>> {
     const end = new Date(now.getTime() + windowDays * 24 * 60 * 60 * 1000);
 
-    const rows = await this.db.etaRecord.findMany({
+    const rows = await this.db.eTARecord.findMany({
       where: {
         expiresAt: {
           gte: now,
