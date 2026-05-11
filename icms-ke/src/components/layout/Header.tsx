@@ -16,7 +16,7 @@ export function Header() {
           href="/"
           className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 py-1 text-[15px] font-semibold tracking-wide text-white transition hover:text-[color:var(--accent-green)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--accent-red)]"
         >
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-[color:var(--accent-green)] to-[color:var(--accent-red)] text-[13px] font-black text-white">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[color:var(--accent-green)] text-[13px] font-black text-white">
             IM
           </span>
           <span>Immigration CMS</span>
@@ -34,12 +34,20 @@ export function Header() {
           ))}
         </nav>
 
-        <Link
-          href="#public-services"
-          className="hidden min-h-11 items-center justify-center rounded-xl bg-linear-to-r from-[color:var(--accent-green)] to-[color:var(--accent-red)] px-4 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(31,143,75,0.35)] transition hover:scale-[1.01] hover:shadow-[0_12px_26px_rgba(192,24,47,0.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--accent-green)] md:inline-flex"
-        >
-          Public Services
-        </Link>
+        <div className="hidden items-center gap-2 md:flex">
+          <Link
+            href="/public/report-violation"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[color:var(--accent-red)] px-4 text-sm font-semibold text-white transition hover:bg-[#a01226] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--accent-red)]"
+          >
+            Report Violation
+          </Link>
+          <Link
+            href="#public-services"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[color:var(--accent-green)] px-4 text-sm font-semibold text-white transition hover:bg-[#177a3f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--accent-green)]"
+          >
+            Public Services
+          </Link>
+        </div>
 
         <details className="group relative md:hidden">
           <summary className="inline-flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-xl border border-white/20 bg-white/5 px-3 text-sm font-semibold text-white transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--accent-red)]">
@@ -60,8 +68,14 @@ export function Header() {
               </Link>
             ))}
             <Link
+              href="/public/report-violation"
+              className="mt-1 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[color:var(--accent-red)] px-3 text-sm font-semibold text-white transition hover:bg-[#a01226]"
+            >
+              Report Violation
+            </Link>
+            <Link
               href="#public-services"
-              className="mt-1 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-linear-to-r from-[color:var(--accent-green)] to-[color:var(--accent-red)] px-3 text-sm font-semibold text-white"
+              className="mt-1 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[color:var(--accent-green)] px-3 text-sm font-semibold text-white transition hover:bg-[#177a3f]"
             >
               Public Services
             </Link>

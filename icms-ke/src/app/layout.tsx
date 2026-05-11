@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
 const jakartaSans = Plus_Jakarta_Sans({

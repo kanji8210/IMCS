@@ -13,24 +13,30 @@ export class PrismaViolationRepository implements ViolationRepository {
   constructor(private db: PrismaClient) {}
 
   async save(violation: Violation): Promise<void> {
+    const updateData: any = {
+      status: violation.getStatus() as unknown as PrismaViolation['status'],
+      reportContext: violation.getReportContext() as any,
+      updatedAt: violation.getUpdatedAt(),
+    };
+
+    const createData: any = {
+      id: violation.getId(),
+      individualId: violation.getIndividualId(),
+      type: violation.getType() as unknown as PrismaViolation['type'],
+      domain: violation.getDomain() as unknown as PrismaViolation['domain'],
+      severity: violation.getSeverity() as unknown as PrismaViolation['severity'],
+      description: violation.getDescription(),
+      reportContext: violation.getReportContext() as any,
+      reportedByActorId: violation.getReportedByActorId(),
+      status: violation.getStatus() as unknown as PrismaViolation['status'],
+      createdAt: violation.getCreatedAt(),
+      updatedAt: violation.getUpdatedAt(),
+    };
+
     await this.db.violation.upsert({
       where: { id: violation.getId() },
-      update: {
-        status: violation.getStatus() as unknown as PrismaViolation['status'],
-        updatedAt: violation.getUpdatedAt(),
-      },
-      create: {
-        id: violation.getId(),
-        individualId: violation.getIndividualId(),
-        type: violation.getType() as unknown as PrismaViolation['type'],
-        domain: violation.getDomain() as unknown as PrismaViolation['domain'],
-        severity: violation.getSeverity() as unknown as PrismaViolation['severity'],
-        description: violation.getDescription(),
-        reportedByActorId: violation.getReportedByActorId(),
-        status: violation.getStatus() as unknown as PrismaViolation['status'],
-        createdAt: violation.getCreatedAt(),
-        updatedAt: violation.getUpdatedAt(),
-      },
+      update: updateData,
+      create: createData,
     });
   }
 
@@ -133,6 +139,7 @@ export class PrismaViolationRepository implements ViolationRepository {
       type: record.type as ViolationType,
       severity: record.severity as ViolationSeverity,
       description: record.description,
+      reportContext: (record as any).reportContext ?? null,
       reportedByActorId: record.reportedByActorId,
       status: record.status as ViolationStatus,
       createdAt: record.createdAt,

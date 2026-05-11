@@ -132,6 +132,7 @@ model Violation {
   domain           ViolationDomain
   severity         ViolationSeverity
   description      String            @db.Text
+  reportContext    Json?
   reportedByActorId String?
   status           ViolationStatus   @default(REPORTED)
   createdAt        DateTime          @default(now())

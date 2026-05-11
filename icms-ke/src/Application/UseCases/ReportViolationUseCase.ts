@@ -14,6 +14,7 @@ export interface ReportViolationCommand {
   violationType: ViolationType;
   severity: ViolationSeverity;
   description: string;
+  reportContext?: Record<string, unknown> | null;
   reportedByActorId: string | null; // null for public/external reports
 }
 
@@ -62,6 +63,7 @@ export class ReportViolationUseCase {
       type: command.violationType,
       severity: command.severity,
       description: command.description,
+      reportContext: command.reportContext ?? null,
       reportedByActorId: actorId,
     });
 
@@ -91,6 +93,7 @@ export class ReportViolationUseCase {
         type: violation.getType(),
         priority: routingResult.priority,
         targetAudience: routingResult.targetAudience,
+        hasReportContext: Boolean(command.reportContext),
       },
       occurredAt: this.clockPort.now(),
     });

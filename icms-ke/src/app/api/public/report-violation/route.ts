@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { ReportViolationUseCase, ReportViolationCommand } from "@/Application/UseCases/ReportViolationUseCase";
-import { PrismaViolationRepository } from "@/Infrastructure/Persistence/Repositories/PrismaViolationRepository";
-import { ViolationRoutingService } from "@/Infrastructure/Services/ViolationRoutingService";
-import { ConsoleAuditAdapter } from "@/Infrastructure/External/ConsoleAuditAdapter";
-import { ConsoleNotificationAdapter } from "@/Infrastructure/External/ConsoleNotificationAdapter";
-import { SystemClock } from "@/Infrastructure/External/SystemClock";
-import { prisma } from "@/Infrastructure/Persistence/prismaClient";
+import { ReportViolationCommand } from "@/Application/UseCases/ReportViolationUseCase";
+import { buildViolationController } from "@/Infrastructure/bootstrap/buildViolationController";
 import { ViolationType } from "@/Domain/ValueObjects/ViolationType";
 import { ViolationSeverity } from "@/Domain/Entities/Violation";
 import { buildSecurityContext } from "@/Presentation/Middleware/buildSecurityContext";
@@ -14,8 +9,41 @@ import { buildSecurityContext } from "@/Presentation/Middleware/buildSecurityCon
 /**
  * Validation schema for report violation request
  */
+const SubjectSchema = z.object({
+  fullName: z.string().optional().nullable(),
+  nationality: z.string().optional().nullable(),
+  passportNumber: z.string().optional().nullable(),
+  contactPerson: z.string().optional().nullable(),
+  organisationName: z.string().optional().nullable(),
+  location: z.string().optional().nullable(),
+  directorName: z.string().optional().nullable(),
+}).optional().nullable();
+
+const ReporterSchema = z.object({
+  reporterCategory: z.enum(["public", "law_enforcement"]).optional().nullable(),
+  fullName: z.string().optional().nullable(),
+  phoneOrEmail: z.string().optional().nullable(),
+  relationship: z.string().optional().nullable(),
+  officerAgencyType: z.enum(["police", "immigration", "state_officer_other"]).optional().nullable(),
+  officerRankOrTitle: z.string().optional().nullable(),
+  officerServiceNumber: z.string().optional().nullable(),
+  officerStationOrUnit: z.string().optional().nullable(),
+  contactEstablishedWithSubject: z.enum(["yes", "no"]).optional().nullable(),
+  contactEstablishedAt: z.string().optional().nullable(),
+  otherInstitutionHasReport: z.boolean().optional(),
+  otherInstitutionName: z.string().optional().nullable(),
+  otherInstitutionReference: z.string().optional().nullable(),
+  custodyStatus: z.enum(["not_in_custody", "arrested", "detained"]).optional().nullable(),
+  custodySince: z.string().optional().nullable(),
+  assistanceNeeded: z.string().optional().nullable(),
+  whistleblowerProtection: z.boolean().optional(),
+}).optional().nullable();
+
 const ReportViolationSchema = z.object({
   individualId: z.string().optional().nullable(),
+  subjectType: z.enum(["individual", "organisation"]).optional().nullable(),
+  subject: SubjectSchema,
+  reporter: ReporterSchema,
   violationType: z.enum([
     // Temporal
     ViolationType.ETA_OVERSTAY,
@@ -34,6 +62,7 @@ const ReportViolationSchema = z.object({
     ViolationType.PROHIBITED_IMMIGRANT,
     ViolationType.CRIMINAL_CONVICTION,
     ViolationType.THREAT_TO_NATIONAL_SECURITY,
+    ViolationType.SUSPECTED_HUMAN_TRAFFICKING,
   ] as const),
   severity: z.enum([
     ViolationSeverity.LOW,
@@ -82,31 +111,22 @@ export async function POST(request: NextRequest) {
     // Extract actor context (for authenticated reports)
     const securityContext = buildSecurityContext(request.headers);
 
-    // Build use case dependencies
-    const violationRepository = new PrismaViolationRepository(prisma);
-    const routingService = new ViolationRoutingService();
-    const auditPort = new ConsoleAuditAdapter();
-    const notificationPort = new ConsoleNotificationAdapter();
-    const clockPort = new SystemClock();
-
-    // Create use case
-    const reportViolationUseCase = new ReportViolationUseCase(
-      violationRepository,
-      routingService,
-      securityContext,
-      auditPort,
-      notificationPort,
-      clockPort,
-    );
+    // Build controller via composition root
+    const controller = buildViolationController(securityContext);
 
     // Execute use case
-    const result = await reportViolationUseCase.execute({
+    const result = await controller.reportViolation({
       individualId: input.individualId || null,
       violationType: input.violationType as ViolationType,
       severity: input.severity as ViolationSeverity,
       description: input.description,
+      reportContext: {
+        subjectType: input.subjectType || null,
+        subject: input.subject || null,
+        reporter: input.reporter || null,
+      },
       reportedByActorId: securityContext.actorId || null,
-    } as ReportViolationCommand);
+    } as ReportViolationCommand, securityContext);
 
     // Return success response
     return NextResponse.json(
@@ -175,6 +195,7 @@ export async function GET() {
       PROHIBITED_IMMIGRANT: "Previously deported or blacklisted person attempting re-entry",
       CRIMINAL_CONVICTION: "Non-citizen convicted of offense punishable by 3+ years imprisonment",
       THREAT_TO_NATIONAL_SECURITY: "Involvement in terrorism, espionage, or organized crime",
+      SUSPECTED_HUMAN_TRAFFICKING: "Indicators of trafficking, coercion, organised transportation or exploitation of persons",
     },
     severities: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
     exampleRequest: {

@@ -37,6 +37,7 @@ export class Violation {
   private domain: ViolationDomain;
   private severity: ViolationSeverity;
   private description: string;
+  private reportContext: Record<string, unknown> | null;
   private reportedByActorId: string | null; // null for anonymous/external reports
   private status: ViolationStatus;
   private createdAt: Date;
@@ -49,6 +50,7 @@ export class Violation {
     type: ViolationType;
     severity: ViolationSeverity;
     description: string;
+    reportContext?: Record<string, unknown> | null;
     reportedByActorId: string | null;
     status?: ViolationStatus;
     createdAt: Date;
@@ -60,6 +62,7 @@ export class Violation {
     this.domain = getViolationDomain(props.type);
     this.severity = props.severity;
     this.description = props.description;
+    this.reportContext = props.reportContext ?? null;
     this.reportedByActorId = props.reportedByActorId;
     this.status = props.status || ViolationStatus.REPORTED;
     this.createdAt = props.createdAt;
@@ -91,6 +94,7 @@ export class Violation {
     type: ViolationType;
     severity: ViolationSeverity;
     description: string;
+    reportContext?: Record<string, unknown> | null;
     reportedByActorId: string | null;
   }): Violation {
     return new Violation({
@@ -99,6 +103,7 @@ export class Violation {
       type: props.type,
       severity: props.severity,
       description: props.description,
+      reportContext: props.reportContext ?? null,
       reportedByActorId: props.reportedByActorId,
       status: ViolationStatus.REPORTED,
       createdAt: new Date(),
@@ -264,6 +269,10 @@ export class Violation {
     return this.description;
   }
 
+  getReportContext(): Record<string, unknown> | null {
+    return this.reportContext;
+  }
+
   getReportedByActorId(): string | null {
     return this.reportedByActorId;
   }
@@ -306,6 +315,7 @@ export class Violation {
       domain: this.domain,
       severity: this.severity,
       description: this.description,
+      reportContext: this.reportContext,
       reportedByActorId: this.reportedByActorId,
       status: this.status,
       createdAt: this.createdAt,

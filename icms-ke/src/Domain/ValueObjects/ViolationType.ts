@@ -36,6 +36,7 @@ export enum ViolationType {
   PROHIBITED_IMMIGRANT = "PROHIBITED_IMMIGRANT",
   CRIMINAL_CONVICTION = "CRIMINAL_CONVICTION",
   THREAT_TO_NATIONAL_SECURITY = "THREAT_TO_NATIONAL_SECURITY",
+  SUSPECTED_HUMAN_TRAFFICKING = "SUSPECTED_HUMAN_TRAFFICKING",
 }
 
 /**
@@ -63,6 +64,7 @@ export function getViolationDomain(type: ViolationType): ViolationDomain {
     [ViolationType.PROHIBITED_IMMIGRANT]: ViolationDomain.SECURITY,
     [ViolationType.CRIMINAL_CONVICTION]: ViolationDomain.SECURITY,
     [ViolationType.THREAT_TO_NATIONAL_SECURITY]: ViolationDomain.SECURITY,
+    [ViolationType.SUSPECTED_HUMAN_TRAFFICKING]: ViolationDomain.SECURITY,
   };
 
   return domainMap[type];
@@ -89,6 +91,7 @@ export function getViolationTypeLabel(type: ViolationType): string {
     [ViolationType.PROHIBITED_IMMIGRANT]: "Prohibited Immigrant Status",
     [ViolationType.CRIMINAL_CONVICTION]: "Criminal Conviction",
     [ViolationType.THREAT_TO_NATIONAL_SECURITY]: "Threat to National Security",
+    [ViolationType.SUSPECTED_HUMAN_TRAFFICKING]: "Suspected Human Trafficking",
   };
 
   return labels[type];
